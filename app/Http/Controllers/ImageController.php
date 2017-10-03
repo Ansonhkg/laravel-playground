@@ -16,7 +16,7 @@ class ImageController extends Controller
      * @return string imageUrl
      */
     public function getProfilePic(){
-        return Image::where(['user_id' => Auth::user()->id, 'type'=>'profile'])->first();
+        return Auth::user()->profilePic()->first();
     }
     /**
      * Update Profile Picture
@@ -49,10 +49,10 @@ class ImageController extends Controller
      * @return void
      */
     public function updateProfileImage(){
-        $profile = Profile::where('user_id', Auth::user()->id)->first();
+        $profile = Auth::user()->profile()->first();
         
         if($profile){
-            $profile->img_id = Image::where(['user_id' => Auth::user()->id, 'type' => 'profile'])->first()->id;
+            $profile->img_id = $this->getProfilePic()->id;
             $profile->save();
         }
     }

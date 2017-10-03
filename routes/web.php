@@ -41,7 +41,7 @@ Route::post('revokeRole', 'UserController@revokeRole')->name('revokeRole');
  * Testing Routes
  */
 Route::prefix('testing')->group(function (){
-    Route::get('allroles', 'UserController@all');
+    Route::get('/', 'TestController@index')->name('test');
 });
 
 /**

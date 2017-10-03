@@ -45,6 +45,6 @@ class User extends Authenticatable
     }
 
     public function profilePic(){
-        return $this->images()->where(['user_id' => Auth::user()->id, 'type' => 'profile'])->first()->path;
+        return $this->hasOne(Image::class)->where('type', 'profile');
     }
 }
