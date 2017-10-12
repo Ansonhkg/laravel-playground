@@ -17,17 +17,17 @@ class ProfileController extends Controller
     {
         //
         $profile = Profile::find(Auth::user()->id);
-        $profilePicPath = Auth::user()->images()->where(['user_id' => Auth::user()->id, 'type' => 'profile'])->first();
+        $profilePic = Auth::user()->images()->where(['user_id' => Auth::user()->id, 'type' => 'profile'])->first();
         
-        if($profilePicPath == null){
-            $profilePicPath = null;
+        if($profilePic == null){
+            $profilePic = null;
         }else{
-            $profilePicPath = $profilePicPath->path;
+            $profilePic = $profilePic->name;
         }
 
         return view('profile.index')
             ->with('profile', $profile)
-            ->with('profile_pic', $profilePicPath);
+            ->with('profile_pic', $profilePic);
     }
 
     /**

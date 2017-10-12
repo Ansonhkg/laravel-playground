@@ -28,46 +28,78 @@ class ImageController extends Controller
         $type = 'profile';
         return $this->postImage($request, $type);
     }
+    
+    /**
+     * Delete Profile Pics
+     *
+     * @return back()
+     */
+    public function deleteProfilePic(){
+        $this->deleteOldProfilePics();
+        return back()
+            ->with('success', 'You have successfully deleted your profile pic');
+    }
+
     /**
      * Delete old pictures from storage && find all pictures on image table and delete it
      *
      * @return void
      */
-    public function resetProfileImage(){
-        // Delete old profile picture from stoage
-        $old_profile_pic = str_replace('storage', 'public', $this->getProfilePic()->path);
-        Storage::delete($old_profile_pic);
-
-        // Find all profile pictures on image table and delete it
-        if($this->getProfilePic()->count() > 0){
-            $this->getProfilePic()->delete();
+    protected function deleteOldProfilePics(){
+        // Delete old profile picture from storage
+        // $old_profile_pic = str_replace('storage', 'public', $this->getProfilePic()->name);
+        if(!$this->getProfilePic() == null){
+            Storage::delete('public/' . $this->getProfilePic()->name);
+            
+            // Find all profile pictures on image table and delete it
+            if($this->getProfilePic()->count() > 0){
+                $this->getProfilePic()->delete();
+            }
         }
+
+        return $this;
     }
     /**
      * Update Profile Records
      *
      * @return void
      */
-    public function updateProfileImage(){
+    protected function updateProfileImgId(){
         $profile = Auth::user()->profile()->first();
         
         if($profile){
             $profile->img_id = $this->getProfilePic()->id;
             $profile->save();
         }
+
+        return $this;
     }
+    
     /**
-     * Store Image
+     * Store image to table
      *
      * @return void
      */
-    public function storeImage($path, $type){
+    protected function storeImageToTable($name, $type){
         $image = new Image();
         $image->user_id = Auth::user()->id;
         $image->type = $type;
-        $image->path = $path;
+        $image->name = $name;
 
         Auth::user()->images()->save($image);
+
+        return $this;
+    }
+
+    /**
+     * Store image to storage
+     *
+     * @param Request->file
+     * @return void
+     */
+    protected function storeImageToStorage($file, $imageName){
+        $file->storeAs('public', $imageName);
+        return $this;
     }
 
     /**
@@ -96,19 +128,14 @@ class ImageController extends Controller
         $filename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
         $imageName = str_slug(date('Y-m-d-h-i-s') . $filename . str_random()) . '.' . $file->extension();
         
-        // Store file to storage/app/public/images
-        $file->storeAs('public/images', $imageName);
-        
-        // Reset Profile Records
-        if(!$this->getProfilePic() == null){
-            $this->resetProfileImage();
-        }
-
-        // Store record to images table
-        $this->storeImage('storage/images/' . $imageName, $type);
-        
-        // Update record on profile table
-        $this->updateProfileImage();
+        // Delete old profile pics
+        $this->deleteOldProfilePics()
+            // Store file to storage/app/public/images
+            ->storeImageToStorage($file, $imageName)
+            // Store record to images table
+            ->storeImageToTable($imageName, $type)
+            // Update record on profile table
+            ->updateProfileImgId();
 
         //return
         return back()

@@ -12,8 +12,4 @@ class Image extends Model
         return $this->belongsTo('App\User');
     }
 
-    // public function profilePic(){
-    //     return $this->user()->images()->where('type', 'profole')->first();
-    // }
-
 }

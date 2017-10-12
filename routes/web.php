@@ -53,4 +53,29 @@ Route::post('postImage', 'ImageController@postImage')->name('postImage');
 
 Route::prefix('upload')->group(function(){
     Route::post('update-profile-pic', 'ImageController@updateProfilePic')->name('update-profile-pic');
+
+    Route::post('delete', 'ImageController@deleteProfilePic')->name('delete-profile-pic');
 });
+
+/**
+ * Images
+ */
+Route::get('images/{filename}', function ($filename)
+{
+    $path = storage_path() . '/app/public/images/' . $filename;
+
+    if(!File::exists($path)) abort(404);
+
+    $file = File::get($path);
+    $type = File::mimeType($path);
+
+    $response = Response::make($file, 200);
+    $response->header("Content-Type", $type);
+
+    return $response;
+});
+
+
+Route::get('changepassword', 'AccountSettings\PasswordController@index')->name('changepassword');
+
+Route::post('updatepassword', 'AccountSettings\PasswordController@update')->name('updatepassword');
